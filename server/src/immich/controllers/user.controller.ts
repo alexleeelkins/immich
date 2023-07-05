@@ -1,4 +1,5 @@
 import {
+  AuthUserDto,
   CreateProfileImageDto,
   CreateProfileImageResponseDto,
   CreateUserDto,
@@ -27,10 +28,9 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Response as Res } from 'express';
+import { AdminRoute, Authenticated, AuthUser, PublicRoute } from '../app.guard';
+import { UseValidation } from '../app.utils';
 import { profileImageUploadOption } from '../config/profile-image-upload.config';
-import { AuthUser, AuthUserDto } from '../decorators/auth-user.decorator';
-import { AdminRoute, Authenticated, PublicRoute } from '../decorators/authenticated.decorator';
-import { UseValidation } from '../decorators/use-validation.decorator';
 
 @ApiTags('User')
 @Controller('user')
@@ -98,7 +98,7 @@ export class UserController {
   }
 
   @Get('/profile-image/:userId')
-  @Header('Cache-Control', 'max-age=600')
+  @Header('Cache-Control', 'private, max-age=86400, no-transform')
   async getProfileImage(@Param() { userId }: UserIdDto, @Response({ passthrough: true }) res: Res): Promise<any> {
     const readableStream = await this.service.getUserProfileImage(userId);
     res.header('Content-Type', 'image/jpeg');
